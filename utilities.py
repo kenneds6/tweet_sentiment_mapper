@@ -2,6 +2,7 @@ import tensorflow as tf
 import tensorflow_hub as hub
 import re
 import pandas as pd
+from joblib import load
 
 
 def s2v(text, use_model=hub.Module("https://tfhub.dev/google/universal-sentence-encoder/2")):
@@ -30,7 +31,7 @@ def remove_pattern(input_txt, pattern):
     return input_txt
 
 
-def tweet_preprocessing(tweets, save=False, path='training_data/cleaned_tweets.csv'):
+def tweet_preprocessing(tweets, save=False, path='twitter_data/cleaned_tweets.csv'):
     """
 
     :param path: If saving, the path to save the tweets to
@@ -47,7 +48,6 @@ def tweet_preprocessing(tweets, save=False, path='training_data/cleaned_tweets.c
         cleaned = cleaned.replace("[^a-zA-Z#]", " ")
         # Remove short words
         cleaned = remove_pattern(cleaned, '\W*\b\w{1,3}\b')
-        # TODO: drop tweets with URL
         # Lower case
         cleaned = cleaned.lower()
         cleaned_tweets.append(cleaned)
@@ -58,3 +58,9 @@ def tweet_preprocessing(tweets, save=False, path='training_data/cleaned_tweets.c
         return 0
     return cleaned_tweets
 
+
+def infer(text, clf_path="/home/scramblesuit/PycharmProjects/tweet_sentiment_mapper/trained_models/lrc_gs.joblib"):
+    text_vecs = s2v(text)
+    clf = load(clf_path)
+    pred = clf.predict(text_vecs)
+    return pred
